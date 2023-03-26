@@ -13,6 +13,8 @@ builder.Services.AddDbContext<AppDBContent>(options => options.UseSqlServer(conn
 
 builder.Services.AddTransient<IAllCars, CarRepository>();
 builder.Services.AddTransient<ICarsCategory, CategoryRepository>();
+builder.Services.AddTransient<IAllOrders, OrdersRepository>();
+
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped(sp => ShopCart.GetCart(sp));
 builder.Services.AddMvc(mvcOtions =>
@@ -28,9 +30,14 @@ var app = builder.Build();
 app.UseDeveloperExceptionPage();
 app.UseStatusCodePages();
 app.UseStaticFiles();
-app.UseSession();   
-app.UseMvcWithDefaultRoute();
+app.UseSession();
+//app.UseMvcWithDefaultRoute();
 
+app.UseMvc(routes =>
+{
+    routes.MapRoute(name: "default", template: "{controller=Home}/{action=Index}/{id?}");
+    routes.MapRoute(name: "categoryFilter", template: "{Car}/{action}/{category?}", defaults: new { Controller = "Car", action = "List" });
+});
 
 
 using (var scope = app.Services.CreateScope())
